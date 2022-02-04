@@ -1,0 +1,4 @@
+.env
+*.mmdb
+GeoIP
+last_modified

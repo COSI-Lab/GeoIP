@@ -59,6 +59,8 @@ func handleConnection(conn net.Conn) {
 		if city == nil {
 			continue
 		}
+
+		// marshal city to json
 		response, err := json.Marshal(city)
 
 		if err != nil {
@@ -66,7 +68,8 @@ func handleConnection(conn net.Conn) {
 			continue
 		}
 
-		_, err = conn.Write(response)
+		// write response to client
+		_, err = conn.Write(append(response, '\n'))
 
 		if err != nil {
 			log.Println(err)

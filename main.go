@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -35,7 +36,14 @@ func main() {
 	defer listener.Close()
 	log.Println("Listening on " + CONN_HOST + ":" + CONN_PORT)
 
-	go handleDatabases()
+	// Update the database every 24 hours
+	updateDatabase()
+	go func() {
+		ticker := time.NewTicker(time.Hour * 24)
+		for range ticker.C {
+			updateDatabase()
+		}
+	}()
 
 	for {
 		// Listen for an incoming connection.

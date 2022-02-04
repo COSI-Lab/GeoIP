@@ -11,7 +11,6 @@ import (
 	"os"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/oschwald/geoip2-golang"
 )
@@ -20,28 +19,31 @@ var db *geoip2.Reader
 var db_lock sync.RWMutex
 
 // handleDatabases checks for new databases and downloads them
-func handleDatabases() {
-	// Check for a new database every day
-	ticker := time.NewTicker(1 * time.Minute)
+func updateDatabase() {
+	log.Println("Checking for new database")
 
-	for range ticker.C {
-		log.Println("Checking for new database")
+	if !checkForNewDatabase() {
+		log.Println("No new database found")
 
-		if !checkForNewDatabase() {
-			log.Println("No new database found")
-		} else {
-			log.Println("New database found. Downloading...")
-			err := downloadNewDatabase()
+		if db == nil {
+			err := openNewDatabase("GeoLite2-City.mmdb")
 
 			if err != nil {
-				log.Println("Error downloading new database:", err)
-			} else {
-				log.Println("Download complete. Opening...")
-				err = openNewDatabase("GeoLite2-City.mmdb")
+				log.Println("Error opening database:", err)
+			}
+		}
+	} else {
+		log.Println("New database found. Downloading...")
+		err := downloadNewDatabase()
 
-				if err != nil {
-					log.Println("Error opening new database:", err)
-				}
+		if err != nil {
+			log.Println("Error downloading new database:", err)
+		} else {
+			log.Println("Download complete. Opening...")
+			err = openNewDatabase("GeoLite2-City.mmdb")
+
+			if err != nil {
+				log.Println("Error opening new database:", err)
 			}
 		}
 	}
